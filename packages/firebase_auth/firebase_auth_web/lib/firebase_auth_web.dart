@@ -327,16 +327,23 @@ class FirebaseAuthWeb extends FirebaseAuthPlatform {
       String autoRetrievedSmsCodeForTesting,
       Duration timeout = const Duration(seconds: 30),
       int forceResendingToken}) async {
-    if (window.document.getElementById("recaptcha-container") == null) {
-      window.document.documentElement.children
-          .add(DivElement()..id = "recaptcha-container");
+    var element = window.document.getElementById("recaptcha-container");
+
+    if (element == null) {
+      element = DivElement()..id = "recaptcha-container";
+      window.document.documentElement.children.add(element);
+    } else {
+      element.remove();
+      element = DivElement()..id = "recaptcha-container";
+      window.document.documentElement.children.add(element);
     }
 
     firebase.RecaptchaVerifier verifier =
-    firebase.RecaptchaVerifier('recaptcha-container', {
+        firebase.RecaptchaVerifier('recaptcha-container', {
       'size': 'invisible',
       'callback': (resp) {
         print('reCAPTCHA solved, allow signInWithPhoneNumber.');
+        element.remove();
       },
       'expired-callback': () {
         verificationFailed(Exception('reCAPTCHA expired'));
